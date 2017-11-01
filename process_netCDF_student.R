@@ -1,12 +1,6 @@
 library(ncdf4)
 library(reshape2)
-library(chron)
-library(RColorBrewer)
-library(lattice)
-library(ncdf)
 
-ncin <- nc_open(f)
-print(ncin)
 #set study area
 lonmax <- -78 #top northern most coordinate
 lonmin <- -100.00
@@ -15,26 +9,27 @@ latmin <- 17 #right western coordinate
 
 # identify the variable you want to extract data for
 
-data <- nc_open(file)#open Netcdf
+#open Netcdf
+data <- nc_open(f)
 
-var <- ncvar_get(data, "chlor_a")
+var <- "chlor_a"
 
 
 #list netCDF files
 f <- list.files(pattern=".nc",full.names=F) 
 #What pattern can you use to identify all the netCDF files?
 
-d <- plyr::adply(file, 1, function(file) {
+d <- plyr::adply(f, 1, function(file) {
 
   # open netCDF file
-  data<-nc_open(f)
+  data<-nc_open(file)
 
   # extract data
   lon<-ncvar_get(data,"lon")
   lat<- ncvar_get(data,"lat")
   tmp.array <- ncvar_get(data, data$var[[var]])
   dunits <- ncatt_get(data, var, "units")$value
-  fillvalue <- "NA"
+  fillvalue <- NA
 
   dim(tmp.array)
 
@@ -55,25 +50,36 @@ d <- plyr::adply(file, 1, function(file) {
   
   year <- format(as.Date(datemean,"%Y-%m-%dT%H:%M:%OSZ"), "%Y" ) # get the year
   month <- format(as.Date(datemean,"%Y-%m-%dT%H:%M:%OSZ"), "%m") # get the month
-  day <-  format(as.Date(datemean,"%Y-%m-%dT%H:%M:%OSZ"), "%dT") # get the day
+  day <-  format(as.Date(datemean,"%Y-%m-%dT%H:%M:%OSZ"), "%d") # get the day
 
    # prepare final data set. Include the day (it is missing in the code below)
   dat.varSA<-data.frame(rep(as.integer(year,nrow(dat.varSAtmp))),
                         rep(as.integer(month,nrow(dat.varSAtmp))), 
-                        rep(as.integer(day,nrow(dat.varSAtmp))),
-                        rep(dunits,nrow(dat.varSAtmp)), 
+                        rep(as.integer(day,nrow(dat.varSAtmp))), dat.varSAtmp$lon, dat.varSAtmp$lat,
+                        dat.varSAtmp$value, rep(dunits,nrow(dat.varSAtmp)), 
                         rep(var, nrow(dat.varSAtmp)))
-  names(dat.varSA)<-c("year","month","day","lon","value","unit","var")
+  names(dat.varSA)<-c("year","month","day","lon","lat", "value","unit","var")
   
 
   # close connection
   nc_close(data)
 
   return(dat.varSA)
-head
+
 }, .progress="text", .inform = T)
 
 d <- d[,-1]
 
 # save csv file
+csvfile<- "Chlor_a_data.csv"
+write.table(na.omit(d), csvfile, row.names = FALSE, sep=",")
+
+mean <- mean(chlor_a$value)
+variance <- var(chlor_a$value)
+stdev <-(chlor_a$value)
+
+stats <- data.frame(mean, stdev,variance)
+
+csv <- "Chlor_statsummary"
+write.table(na.omit(stats), csvfile, row.names = FALSE, sep = ",")
 
