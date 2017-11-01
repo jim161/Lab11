@@ -74,12 +74,12 @@ d <- d[,-1]
 csvfile<- "Chlor_a_data.csv"
 write.table(na.omit(d), csvfile, row.names = FALSE, sep=",")
 
-mean <- mean(chlor_a$value)
-variance <- var(chlor_a$value)
-stdev <-(chlor_a$value)
+mean <- mean(Chlor_a_data$value)
+variance <- var(Chlor_a_data$value)
+stdev <-sd(Chlor_a_data$value)
 
 stats <- data.frame(mean, stdev,variance)
 
-csv <- "Chlor_statsummary"
-write.table(na.omit(stats), csvfile, row.names = FALSE, sep = ",")
+csv <- "Chlor_a_statsummary"
+write.table(na.omit(stats), csv, row.names = FALSE, sep = ",")
 
