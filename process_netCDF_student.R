@@ -1,6 +1,12 @@
 library(ncdf4)
 library(reshape2)
+library(chron)
+library(RColorBrewer)
+library(lattice)
+library(ncdf)
 
+ncin <- nc_open(f)
+print(ncin)
 #set study area
 lonmax <- -78 #top northern most coordinate
 lonmin <- -100.00
@@ -8,7 +14,10 @@ latmax <- 31 #left eastern coordinate
 latmin <- 17 #right western coordinate
 
 # identify the variable you want to extract data for
-var <- "chlor_a"
+
+ncin <- nc_open(f)#open Netcdf
+
+var <- ncvar_get(ncin, "chlor_a")
 
 
 #list netCDF files
@@ -22,10 +31,10 @@ d <- plyr::adply(f, 1, function(file) {
 
   # extract data
   lon<-ncvar_get(data,"lon")
-  lat<- # get the latitude
+  lat<- ncvar_get(data,"lat")
   tmp.array <- ncvar_get(data, data$var[[var]])
   dunits <- ncatt_get(data, var, "units")$value
-  fillvalue <-  #set the fill value for cells with no data
+  fillvalue <- ""
 
   dim(tmp.array)
 
@@ -55,7 +64,7 @@ d <- plyr::adply(f, 1, function(file) {
   nc_close(data)
 
   return(dat.varSA)
-
+head
 }, .progress="text", .inform = T)
 
 d <- d[,-1]
