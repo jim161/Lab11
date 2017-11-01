@@ -8,11 +8,12 @@ latmax <- 31 #left eastern coordinate
 latmin <- 17 #right western coordinate
 
 # identify the variable you want to extract data for
-var <- chlor_a
+var <- "chlor_a"
 
 
 #list netCDF files
-f <- list.files(pattern=".nc",full.names=F) #What pattern can you use to identify all the netCDF files?
+f <- list.files(pattern=".nc",full.names=F) 
+#What pattern can you use to identify all the netCDF files?
 
 d <- plyr::adply(f, 1, function(file) {
 
